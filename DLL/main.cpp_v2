@@ -1,0 +1,152 @@
+#include <iostream>
+#include <memory>
+template <typename T>
+class DoubleLinkedList {
+private:
+    struct Node {
+        T sData;
+        Node* sPrevNode;
+        Node* sNextNode;
+        Node(const T& data) : sData(data), sPrevNode(nullptr), sNextNode(nullptr) {}
+    };
+    Node* mHeadNode;
+    Node* mTailNode;
+    int mSize;
+
+public:
+    // 1. 생성자
+    DoubleLinkedList() : mHeadNode(nullptr), mTailNode(nullptr), mSize(0) {
+    }
+    DoubleLinkedList(const DoubleLinkedList&) = delete;
+    DoubleLinkedList& operator=(const DoubleLinkedList&) = delete;
+    // 2. 소멸자
+    ~DoubleLinkedList() {
+        clear();
+    }
+    // 3. 데이터 입력
+    void push_back(const T& data) {
+        Node* node = new Node(data);
+        if (mHeadNode == nullptr) {
+            mHeadNode = node;
+            mTailNode = node;
+        } else {
+            // mTailNode 을 이용해 만들면 될것 같은데
+            node->sPrevNode = mTailNode;
+            mTailNode->sNextNode = node;
+            mTailNode = node;
+        }
+        ++mSize;
+    }
+    void push_front(const T& data) {
+        Node* node = new Node(data);
+        if (mHeadNode == nullptr) {
+            mHeadNode = node;
+            node->sNextNode = mTailNode;
+            mTailNode = node;
+        } else {
+            node->sNextNode = mHeadNode;
+            mHeadNode->sPrevNode = node;
+            mHeadNode = node;
+        }
+        ++mSize;
+    }
+    // 4. 데이터 삭제
+    void pop_back() {
+        if (mTailNode == nullptr) {
+            // node 가 하나도 없다
+            return;
+        } else {
+            if (mTailNode->sPrevNode != nullptr) {
+                std::cout << "delete data : " << mTailNode->sData << std::endl;
+                Node* node = mTailNode->sPrevNode;
+                node->sNextNode = mTailNode->sNextNode;
+                delete mTailNode;
+                mTailNode = node;
+            } else {
+                std::cout << "delete data2 : " << mTailNode->sData << std::endl;
+                delete mTailNode;
+                mTailNode = nullptr;
+                mHeadNode = nullptr;
+            }
+            --mSize;
+        }
+    }
+    void pop_front() {
+        if (mHeadNode == nullptr) {
+            return;
+        } else {
+            if (mHeadNode->sNextNode == nullptr) {
+                delete mHeadNode;
+                mHeadNode = nullptr;
+                mTailNode = nullptr;
+            } else {
+                Node* node = mHeadNode->sNextNode;
+                node->sPrevNode = nullptr;
+                delete mHeadNode;
+                mHeadNode = node;
+            }
+            --mSize;
+        }
+    }
+    // 5. 모든 데이터 제거
+    void clear() {
+        if (mHeadNode == nullptr) {
+            return;
+        } else {
+            Node* node = mHeadNode;
+            while (node != nullptr) {
+                node = node->sNextNode;
+                delete mHeadNode;
+                mHeadNode = node;
+            }
+            mTailNode = nullptr;
+        }
+        mSize = 0;
+    }
+    // 6. debug
+    void show() const {
+        if (mHeadNode == nullptr) {
+            std::cout << "double linked list is empty" << std::endl;
+        } else {
+            Node* cur = mHeadNode;
+            int index = 0;
+            while (cur != nullptr) {
+                std::cout << "index [ " << index << " ] data: " << cur->sData << std::endl;
+                cur = cur->sNextNode;
+                ++index;
+            }
+        }
+    }
+};
+
+int main() {
+    // DoubleLinkedList<int>* dll = new DoubleLinkedList<int>();
+    auto dll = std::make_unique<DoubleLinkedList<int>>();
+    std::cout << "push_back [테스트] 1 -> 2 -> 3 -> 4" << std::endl;
+    dll->push_back(1.1);
+    dll->push_back(2.1);
+    dll->push_back(3.1);
+    dll->push_back(4.1);
+    dll->show();
+
+    std::cout << "push_front [테스트] 11 -> 66 -> 99 -> 1 -> 2 -> 3 -> 4" << std::endl;
+    dll->push_front(99.1);
+    dll->push_front(66.1);
+    dll->push_front(11.1);
+    dll->show();
+
+    std::cout << "pop_back [테스트] 11 -> 66 -> 99 -> 1 -> 2 -> 3" << std::endl;
+    dll->pop_back();
+    dll->show();
+
+    std::cout << "pop_front [테스트] 66 -> 99 -> 1 -> 2 -> 3" << std::endl;
+    dll->pop_front();
+    dll->show();
+
+    std::cout << "clear [테스트] " << std::endl;
+    dll->clear();
+    dll->push_back(4.1);
+    dll->show();
+
+    return 0;
+}
