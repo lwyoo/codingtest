@@ -1,15 +1,31 @@
 #include <iostream>
+#include <stack>
 #include <vector>
-
 std::vector<std::vector<int>> adj;
 std::vector<bool> visited;
-void dfs(int node) {
-    visited[node] = true;
-    std::cout << node << " ";
+// 재귀 버전
+// void dfs(const int& value) {
+//     std::cout << value << " ";
+//     visited[value] = true;
+//     for (auto next : adj[value]) {
+//         if (!visited[next]) {
+//             dfs(next);
+//         }
+//     }
+// }
 
-    for (int next : adj[node]) {
-        if (!visited[next]) {
-            dfs(next);
+// stack 버전
+void dfs(int start) {
+    std::stack<int> st;
+    st.push(start);
+    while (!st.empty()) {
+        int curr = st.top();
+        st.pop();
+        if (visited[curr]) continue;
+        visited[curr] = true;
+        std::cout << curr << " ";
+        for (auto it = adj[curr].rbegin(); it != adj[curr].rend(); ++it) {
+            if (!visited[*it]) st.push(*it);
         }
     }
 }
@@ -23,24 +39,40 @@ int main() {
     //  /|   |\
     // 4 5   6 7
 
-    int cnt = 7;
-    visited.assign(cnt + 1, false);
-    adj.assign(cnt + 1, {});
+    adj.assign(7 + 1, {});
 
-    auto aaa = [&](int node_a, int node_b) {
-        adj[node_a].push_back(node_b);
-        adj[node_b].push_back(node_a);
+    visited.assign(7 + 1, false);
+
+    auto addNodeValue = [&](int node, int value) {
+        adj[node].push_back(value);
     };
 
-    aaa(1, 2);
-    aaa(1, 3);
+    // auto dfs = [&](auto&& self, int node) -> void {
+    //     visited[node] = true;
+    //     std::cout << node << " ";
+    //     for (int next : adj[node]) {
+    //         if (!visited[next]) {
+    //             self(self, next);
+    //         }
+    //     }
+    // };
 
-    aaa(2, 4);
-    aaa(2, 5);
+    addNodeValue(1, 2);
+    addNodeValue(1, 3);
 
-    aaa(3, 6);
-    aaa(3, 7);
-    // 재귀로 돌면서 탐색 하기
+    addNodeValue(2, 4);
+    addNodeValue(2, 5);
+
+    addNodeValue(3, 6);
+    addNodeValue(3, 7);
+
     dfs(1);
+
+    // for (auto& temp : adj) {
+    //     std::cout << "data: [ ";
+    //     for (auto temp2 : temp)
+    //         std::cout << temp2 << " ";
+    //     std::cout << "]" << std::endl;
+    // }
     return 1;
 }
